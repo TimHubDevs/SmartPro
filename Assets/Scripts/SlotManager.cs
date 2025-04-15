@@ -4,19 +4,38 @@ using UnityEngine.UI;
 
 public class SlotManager : MonoBehaviour
 {
+    [Header("Slot")]
     [SerializeField] private RectTransform slot;
     [SerializeField] private Image slotIcon;
-    [SerializeField] private GameObject sidePanel;
     [SerializeField] private float flyDuration = 0.5f;
+    [SerializeField] private RectTransform boostClone;
+    [Header("Side Panel")]
+    [SerializeField] private RectTransform sidePanel;
+    [SerializeField] private RectTransform arrowButton;
+    [SerializeField] private float slideDuration = 0.5f;
+    [SerializeField] private float hiddenOffsetX = 210f;
+    
+    private bool isPanelVisible = true;
+    private Vector2 shownPosition;
+    private Vector2 hiddenPosition;
+    private Vector2 slotLocalPosition;
+    
+    private void Start()
+    {
+        shownPosition = sidePanel.anchoredPosition;
+        hiddenPosition = shownPosition + new Vector2(hiddenOffsetX, 0);
 
+        slotLocalPosition = GetLocalPositionIn(boostClone.parent as RectTransform, slot);;
+        sidePanel.anchoredPosition = hiddenPosition;
+        isPanelVisible = false;
+    }
+    
     public void AssignBoostSprite(RectTransform boostClone)
     {
-        if (!sidePanel.activeInHierarchy)
-            sidePanel.SetActive(true);
+        if (!isPanelVisible)
+            TogglePanel();
 
-        Vector2 localPos = GetLocalPositionIn(boostClone.parent as RectTransform, slot);
-        
-        boostClone.DOAnchorPos(localPos, flyDuration).SetEase(Ease.InOutQuad).OnComplete(() =>
+        boostClone.DOAnchorPos(slotLocalPosition, flyDuration).SetEase(Ease.InOutQuad).OnComplete(() =>
         {
             boostClone.gameObject.SetActive(false);
 
@@ -30,9 +49,20 @@ public class SlotManager : MonoBehaviour
     
     private Vector2 GetLocalPositionIn(RectTransform targetSpace, RectTransform worldSpaceRect)
     {
-        Vector3 worldPos = worldSpaceRect.position;
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(targetSpace, worldPos, null, out localPoint);
+        Vector3 worldPos = worldSpaceRect.TransformPoint(worldSpaceRect.rect.center);
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(targetSpace, worldPos, null, out Vector2 localPoint);
         return localPoint;
+    }
+    
+    public void TogglePanel()
+    {
+        isPanelVisible = !isPanelVisible;
+
+        Vector2 targetPos = isPanelVisible ? shownPosition : hiddenPosition;
+        float targetRotation = isPanelVisible ? 180f : 0f;
+
+        sidePanel.DOAnchorPos(targetPos, slideDuration).SetEase(Ease.InOutCubic);
+        arrowButton.DORotate(new Vector3(0, 0, targetRotation), slideDuration).SetEase(Ease.InOutCubic);
     }
 }

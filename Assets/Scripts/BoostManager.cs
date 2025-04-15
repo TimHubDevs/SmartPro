@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
+using TMPro;
 
 public class BoostManager : MonoBehaviour
 {
@@ -27,6 +28,9 @@ public class BoostManager : MonoBehaviour
     [SerializeField] private Button resetButton;
     [SerializeField] private Button okButton;
     [SerializeField] private SlotManager slotManager;
+    [SerializeField] private TextMeshProUGUI titleText;
+    [SerializeField] private TextMeshProUGUI descriptionText;
+    [SerializeField] private Color disabledColor;
 
     private BoostType[] currentBoosts = new BoostType[3];
     private BoostType? selectedBoost = null;
@@ -34,12 +38,11 @@ public class BoostManager : MonoBehaviour
 
     private void Start()
     {
-        resetButton.onClick.AddListener(ResetBoosts);
         okButton.gameObject.SetActive(false);
         ResetBoosts();
     }
 
-    private void ResetBoosts()
+    public void ResetBoosts()
     {
         okButton.gameObject.SetActive(false);
         selectedBoost = null;
@@ -143,6 +146,9 @@ public class BoostManager : MonoBehaviour
         if (selectedIndex == -1)
             return;
 
+        titleText.color = disabledColor;
+        descriptionText.color = disabledColor;
+        
         okButton.gameObject.SetActive(false);
         resetButton.gameObject.SetActive(false);
         
