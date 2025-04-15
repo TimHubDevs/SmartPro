@@ -25,12 +25,13 @@ public class BoostManager : MonoBehaviour
     [Tooltip("Order must match BoostType enum")] [SerializeField]
     private Sprite[] boostSprites;
 
-    [SerializeField] private Button resetButton;
     [SerializeField] private Button okButton;
     [SerializeField] private SlotManager slotManager;
     [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private Color disabledColor;
+    [SerializeField] private CanvasGroup boostPanelGroup;
+    [SerializeField] private AnimateOKButton animateOkButton;
 
     private BoostType[] currentBoosts = new BoostType[3];
     private BoostType? selectedBoost = null;
@@ -44,7 +45,11 @@ public class BoostManager : MonoBehaviour
 
     public void ResetBoosts()
     {
-        okButton.gameObject.SetActive(false);
+        if (okButton.gameObject.activeInHierarchy)
+        {
+            okButton.interactable = false;
+            animateOkButton.HideOkButton();
+        }
         selectedBoost = null;
 
         //If we need just fast and easy job I know LINQ
@@ -69,7 +74,6 @@ public class BoostManager : MonoBehaviour
         List<BoostType> previous = new List<BoostType>(currentBoosts);
         List<BoostType> pool = new List<BoostType>();
 
-        // Fill the pool with new boosts only
         for (int i = 0; i < allBoosts.Length; i++)
         {
             if (!previous.Contains(allBoosts[i]))
@@ -82,7 +86,6 @@ public class BoostManager : MonoBehaviour
             pool[0], pool[1]
         };
 
-        // Add a 3rd boost that is not included in the first two
         List<BoostType> remaining = new List<BoostType>();
         for (int i = 0; i < allBoosts.Length; i++)
         {
@@ -93,12 +96,13 @@ public class BoostManager : MonoBehaviour
         BoostType third = remaining[Random.Range(0, remaining.Count)];
         newBoosts.Add(third);
 
-        // Last Shuffle
         Shuffle(newBoosts);
         currentBoosts = newBoosts.ToArray();
 
         for (int i = 0; i < boostIcons.Length; i++)
         {
+            boosts[i].transform.DOKill();
+            boosts[i].transform.localScale = Vector3.one;
             boostIcons[i].sprite = boostSprites[(int)currentBoosts[i]];
             boostIcons[i].SetNativeSize();
             boostHighlight[i].SetActive(false);
@@ -108,12 +112,32 @@ public class BoostManager : MonoBehaviour
     public void SelectBoost(int index)
     {
         selectedBoost = currentBoosts[index];
-        okButton.gameObject.SetActive(true);
+        if (!okButton.gameObject.activeInHierarchy)
+        {
+            okButton.interactable = true;
+            animateOkButton.ShowOkButtonAnimated();
+        }
+        else
+        {
+            animateOkButton.AnimateOKFeedback();
+        }
 
         for (int i = 0; i < boostIcons.Length; i++)
         {
-            bool active = i == index;
-            boostHighlight[i].SetActive(active);
+            bool isSelected  = i == index;
+            boostHighlight[i].SetActive(isSelected);
+            
+            Transform boostTransform = boosts[i].transform;
+            boostTransform.DOKill();
+
+            if (isSelected)
+            {
+                boostTransform.DOScale(1.15f, 0.25f).SetEase(Ease.OutBack);
+            }
+            else
+            {
+                boostTransform.DOScale(1f, 0.25f).SetEase(Ease.OutQuad);
+            }
         }
     }
 
@@ -149,11 +173,14 @@ public class BoostManager : MonoBehaviour
         titleText.color = disabledColor;
         descriptionText.color = disabledColor;
         
-        okButton.gameObject.SetActive(false);
-        resetButton.gameObject.SetActive(false);
+        GameObject originBoost = boosts[selectedIndex];
+        originBoost.SetActive(false);
+        boostPanelGroup.interactable = false;
         
-        foreach (var boost in boosts)
-            boost.SetActive(false);
+        boostPanelGroup.DOFade(0f, 0.5f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            boostPanelGroup.gameObject.SetActive(false);
+        });
         
         boostClone.SetActive(true);
         cloneIcon.sprite = boostSprites[(int)selectedBoost];
@@ -161,7 +188,6 @@ public class BoostManager : MonoBehaviour
         cloneCheckmark.SetActive(false);
         cloneHighlight.SetActive(true);
         
-        GameObject originBoost = boosts[selectedIndex];
         RectTransform cloneRT = boostClone.GetComponent<RectTransform>();
         RectTransform originRT = originBoost.GetComponent<RectTransform>();
         cloneRT.anchoredPosition = originRT.anchoredPosition;
@@ -176,7 +202,7 @@ public class BoostManager : MonoBehaviour
             if (cloneVFX != null) cloneVFX.Play();
         });
         seq.AppendInterval(0.4f);
-        seq.Append(cloneCheckmark.transform.DOScale(0f, 0.2f)); // сховати
+        seq.Append(cloneCheckmark.transform.DOScale(0f, 0.2f));
         seq.Append(cloneRT.DOScale(0.6f, 0.5f).SetEase(Ease.InCubic));
         seq.AppendCallback(() =>
         {

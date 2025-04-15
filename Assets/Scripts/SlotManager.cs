@@ -39,10 +39,8 @@ public class SlotManager : MonoBehaviour
         {
             boostClone.gameObject.SetActive(false);
 
-            // Бамп-ефект на слоті
             slotIcon.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 8, 1);
 
-            // Міняємо спрайт слота
             slotIcon.sprite = boostClone.gameObject.GetComponentInChildren<Image>().sprite;
         });
     }
@@ -63,6 +61,9 @@ public class SlotManager : MonoBehaviour
         float targetRotation = isPanelVisible ? 180f : 0f;
 
         sidePanel.DOAnchorPos(targetPos, slideDuration).SetEase(Ease.InOutCubic);
-        arrowButton.DORotate(new Vector3(0, 0, targetRotation), slideDuration).SetEase(Ease.InOutCubic);
+        Sequence arrowSeq = DOTween.Sequence();
+
+        arrowSeq.Append(arrowButton.DOPunchScale(Vector3.one * 0.1f, 0.2f, 6, 1));
+        arrowSeq.Join(arrowButton.DORotate(new Vector3(0, 0, targetRotation), slideDuration).SetEase(Ease.InOutCubic));
     }
 }
