@@ -2,19 +2,31 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 
 public class BoostManager : MonoBehaviour
 {
-    [Header("UI References")] [SerializeField]
-    private Image[] boostIcons;
-
+    [Header("UI References")] 
+    [SerializeField]private GameObject[] boosts;
+    [SerializeField] private Image[] boostIcons;
     [SerializeField] private GameObject[] boostHighlight;
-
+    [SerializeField] private GameObject[] boostCheckmark;
+    [SerializeField] private ParticleSystem[] boostVFX;
+    
+    [Header("Clone for Animation")]
+    [SerializeField] private GameObject boostClone;
+    [SerializeField] private Image cloneIcon;
+    [SerializeField] private GameObject cloneHighlight;
+    [SerializeField] private GameObject cloneCheckmark;
+    [SerializeField] private ParticleSystem cloneVFX;
+    
+    [Header("Logic")]
     [Tooltip("Order must match BoostType enum")] [SerializeField]
     private Sprite[] boostSprites;
 
     [SerializeField] private Button resetButton;
     [SerializeField] private Button okButton;
+    [SerializeField] private SlotManager slotManager;
 
     private BoostType[] currentBoosts = new BoostType[3];
     private BoostType? selectedBoost = null;
@@ -31,9 +43,9 @@ public class BoostManager : MonoBehaviour
     {
         okButton.gameObject.SetActive(false);
         selectedBoost = null;
-        
+
         //If we need just fast and easy job I know LINQ
-        
+
         /*List<BoostType> newBoosts = new List<BoostType>();
 
         // Guarantee at least 2 new boosts
@@ -101,7 +113,7 @@ public class BoostManager : MonoBehaviour
             boostHighlight[i].SetActive(active);
         }
     }
-    
+
     private void Shuffle<T>(List<T> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
@@ -111,5 +123,59 @@ public class BoostManager : MonoBehaviour
             list[i] = list[j];
             list[j] = temp;
         }
+    }
+
+    public void ConfirmBoost()
+    {
+        if (selectedBoost == null)
+            return;
+
+        int selectedIndex = -1;
+        for (int i = 0; i < currentBoosts.Length; i++)
+        {
+            if (currentBoosts[i] == selectedBoost)
+            {
+                selectedIndex = i;
+                break;
+            }
+        }
+
+        if (selectedIndex == -1)
+            return;
+
+        okButton.gameObject.SetActive(false);
+        resetButton.gameObject.SetActive(false);
+        
+        foreach (var boost in boosts)
+            boost.SetActive(false);
+        
+        boostClone.SetActive(true);
+        cloneIcon.sprite = boostSprites[(int)selectedBoost];
+        cloneIcon.SetNativeSize();
+        cloneCheckmark.SetActive(false);
+        cloneHighlight.SetActive(true);
+        
+        GameObject originBoost = boosts[selectedIndex];
+        RectTransform cloneRT = boostClone.GetComponent<RectTransform>();
+        RectTransform originRT = originBoost.GetComponent<RectTransform>();
+        cloneRT.anchoredPosition = originRT.anchoredPosition;
+        cloneRT.localScale = Vector3.one;
+        
+        cloneCheckmark.SetActive(true);
+        Sequence seq = DOTween.Sequence();
+        seq.Append(cloneRT.DOAnchorPos(Vector3.zero, 0.5f).SetEase(Ease.OutCubic));
+        seq.Join(cloneRT.DOScale(1.2f, 0.5f).SetEase(Ease.OutBack));
+        seq.AppendCallback(() =>
+        {
+            if (cloneVFX != null) cloneVFX.Play();
+        });
+        seq.AppendInterval(0.4f);
+        seq.Append(cloneCheckmark.transform.DOScale(0f, 0.2f)); // сховати
+        seq.Append(cloneRT.DOScale(0.6f, 0.5f).SetEase(Ease.InCubic));
+        seq.AppendCallback(() =>
+        {
+            cloneHighlight.SetActive(false);
+            slotManager.AssignBoostSprite(cloneRT);
+        });
     }
 }
