@@ -14,6 +14,7 @@ public class SlotManager : MonoBehaviour
     [SerializeField] private RectTransform arrowButton;
     [SerializeField] private float slideDuration = 0.5f;
     [SerializeField] private float hiddenOffsetX = 210f;
+    [SerializeField] private CanvasGroup boostPanelGroup;
     
     private bool isPanelVisible = true;
     private Vector2 shownPosition;
@@ -26,8 +27,6 @@ public class SlotManager : MonoBehaviour
         hiddenPosition = shownPosition + new Vector2(hiddenOffsetX, 0);
 
         slotLocalPosition = GetLocalPositionIn(boostClone.parent as RectTransform, slot);;
-        sidePanel.anchoredPosition = hiddenPosition;
-        isPanelVisible = false;
     }
     
     public void AssignBoostSprite(RectTransform boostClone)
@@ -42,6 +41,16 @@ public class SlotManager : MonoBehaviour
             slotIcon.transform.DOPunchScale(Vector3.one * 0.2f, 0.3f, 8, 1);
 
             slotIcon.sprite = boostClone.gameObject.GetComponentInChildren<Image>().sprite;
+            
+            TogglePanel();
+            
+            DOVirtual.DelayedCall(slideDuration, () =>
+            {
+                boostPanelGroup.DOFade(0f, 0.5f).SetEase(Ease.InOutQuad).OnComplete(() =>
+                {
+                    boostPanelGroup.gameObject.SetActive(false);
+                });
+            });
         });
     }
     

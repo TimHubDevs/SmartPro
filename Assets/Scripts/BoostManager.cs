@@ -208,6 +208,8 @@ public class BoostManager : MonoBehaviour
         {
             cloneHighlight.SetActive(false);
             slotManager.AssignBoostSprite(cloneRT);
+            titleText.gameObject.SetActive(false);
+            descriptionText.gameObject.SetActive(false);
         });
     }
 }

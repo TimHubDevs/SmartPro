@@ -1319,13 +1319,13 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 713332955}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1284472532}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
   m_AnchoredPosition: {x: 68, y: 20.000002}
@@ -2392,6 +2392,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1284472532}
+  - component: {fileID: 1284472533}
   m_Layer: 5
   m_Name: SidePanel
   m_TagString: Untagged
@@ -2420,6 +2421,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 330, y: 0}
   m_Pivot: {x: 1, y: 0.5}
+--- !u!225 &1284472533
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284472531}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1320585231
 GameObject:
   m_ObjectHideFlags: 0
@@ -2761,7 +2774,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 224743570235656286, guid: f441c161692704f8fa30163cc8ea8c53, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 0.05811966
       objectReference: {fileID: 0}
     - target: {fileID: 224743570235656286, guid: f441c161692704f8fa30163cc8ea8c53, type: 3}
       propertyPath: m_AnchorMin.y
@@ -3019,6 +3032,7 @@ MonoBehaviour:
   arrowButton: {fileID: 713332956}
   slideDuration: 0.5
   hiddenOffsetX: 210
+  boostPanelGroup: {fileID: 1284472533}
 --- !u!1 &1870555404
 GameObject:
   m_ObjectHideFlags: 0
