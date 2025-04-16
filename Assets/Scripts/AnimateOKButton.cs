@@ -38,15 +38,4 @@ public class AnimateOKButton : MonoBehaviour
             okButton.gameObject.SetActive(false);
         });;
     }
-
-    public void ClickOKButton()
-    {
-        okButton.DOKill();
-        okButton.localScale = Vector3.one;
-        
-        okButton.DOPunchScale(Vector3.one * 0.1f, 0.25f, 6, 1).SetEase(Ease.OutCubic).OnComplete(() =>
-        {
-            HideOkButton();
-        });
-    }
 }
